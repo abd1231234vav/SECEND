@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple Click-Game</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #ff0000;
+      color: #f3f3f3;
+    }
+
+    h1 {
+      margin-bottom: 0.5rem;
+    }
+
+    #gameBoard {
+      width: 400px;
+      height: 400px;
+      background: #fff;
+      border-radius: 12px;
+      border: 5px solid #426d8a;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      gap: 8px;
+      padding: 8px;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+      margin: 16px 0;
+    }
+
+    .tile {
+      background: #4a90e2;
+      color: #fff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .tile:hover {
+      transform: scale(1.05);
+      background: #6fb5ff;
+    }
+
+    .tile.active {
+      background: #e94e77;
+    }
+
+    #scoreBoard {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      margin-top: 10px;
+      font-size: 1.1rem;
+    }
+
+    button {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 8px;
+      background: #6cbf84;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    button:hover {
+      background: #59a76e;
+    }
+  </style>
+</head>
+<body>
+  <h1>Click the Red Tile!</h1>
+  <div id="scoreBoard">
+    <span>Score: <strong id="score">0</strong></span>
+    <span>Time: <strong id="time">5</strong>s</span>
+    <button id="reset">Restart</button>
+  </div>
+
+  <div id="gameBoard"></div>
+
+  <script>
+    const board = document.getElementById('gameBoard');
+    const scoreEl = document.getElementById('score');
+    const timeEl = document.getElementById('time');
+    const resetBtn = document.getElementById('reset');
+
+    let score = 0;
+    let timeLeft = 5;
+    let activeIndex = null;
+    let intervalId;
+
+    function renderTiles() {
+      board.innerHTML = '';
+      for (let i = 0; i < 16; i++) {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.textContent = i + 1;
+        if (i === activeIndex) tile.classList.add('active');
+
+        tile.addEventListener('click', () => {
+          if (timeLeft <= 0) return;
+          if (i === activeIndex) {
+            score += 1;
+            scoreEl.textContent = score;
+            setActiveTile();
+          }
+        });
+
+        board.appendChild(tile);
+      }
+    }
+
+    function setActiveTile() {
+      activeIndex = Math.floor(Math.random() * 16);
+      renderTiles();
+    }
+
+    function startTimer() {
+      clearInterval(intervalId);
+      intervalId = setInterval(() => {
+        if (timeLeft <= 0) {
+          clearInterval(intervalId);
+          activeIndex = null;
+          renderTiles();
+          // No popup, game just stops and shows score in UI
+          timeEl.textContent = 0;
+          return;
+        }
+        timeLeft -= 1;
+        timeEl.textContent = timeLeft;
+      }, 1000);
+    }
+
+    function startGame() {
+      score = 0;
+      timeLeft = 20;
+      scoreEl.textContent = score;
+      timeEl.textContent = timeLeft;
+      setActiveTile();
+      startTimer();
+    }
+
+    resetBtn.addEventListener('click', startGame);
+
+    startGame();
+  </script>
+</body>
+</html>
